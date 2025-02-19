@@ -8,6 +8,6 @@
         "chat": "Qwen/Qwen2.5-72B-Instruct-128K"
     },
     "retrieval": {
-        "top_k": 10
+        "top_k": 3
     }
 }

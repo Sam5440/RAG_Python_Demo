@@ -1,6 +1,7 @@
-import numpy as np
+from logger import logger
 import os
 import json
+import numpy as np
 from api import get_embedding
 
 # 加载配置文件
@@ -9,32 +10,20 @@ with open('config.json', 'r') as f:
 
 class Kb:
     def __init__(self, filepath):
-        print("=== 初始化知识库 ===")
-        print(f"正在读取文件: {filepath}")
+        logger.info(f"开始初始化知识库: {filepath}")
         self.filepath = filepath
         
         # 检查是否需要重新向量化
         if self.need_recompute():
-            print("知识库文件已更新，需要重新向量化")
-            # 读取文件内容
+            logger.info("需要重新计算向量")
             content = self.read_file(filepath)
-            print(f"文件内容长度: {len(content)} 字符")
-            
-            # 读取拆分好的数组
-            print("\n=== 开始拆分文档 ===")
             self.chunks = self.split_content(content)
-            print(f"拆分完成，共得到 {len(self.chunks)} 个文本块")
-            
-            # 转换成向量并保存
-            print("\n=== 开始向量化 ===")
             self.embeds = self.get_embeddings(self.chunks)
-            print(f"向量化完成，向量维度: {self.embeds.shape}")
-            
-            # 保存向量到本地
             self.save_embeddings()
         else:
-            print("知识库文件未更新，直接加载本地向量数据")
+            logger.info("加载已有向量数据")
             self.load_embeddings()
+        logger.info("知识库初始化完成")
 
     def read_file(self, filepath):
         """读取文件内容"""
@@ -50,40 +39,24 @@ class Kb:
         chunks = [chunk.strip() for chunk in chunks if chunk.strip()]
         return chunks
 
-    def get_embedding(self, chunk):
-        """获取单个文本块的向量表示"""
-        print(f"正在处理文本块: {chunk[:50]}...")
-        embed = get_embedding(chunk)
-        if embed is None:
-            print("警告：该文本块向量化失败")
-        return embed
-
     def get_embeddings(self, chunks):
         """批量获取文本块的向量表示"""
         embeds = []
-        for i, chunk in enumerate(chunks, 1):
-            print(f"\n处理第 {i}/{len(chunks)} 个文本块")
-            embed = self.get_embedding(chunk)
+        for chunk in chunks:
+            embed = get_embedding(chunk)
             if embed is not None:
                 embeds.append(embed)
         return np.array(embeds)
 
     def save_embeddings(self):
         """保存向量到本地文件"""
-        print("\n=== 保存向量到本地 ===")
         save_dir = 'embeddings'
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
+        os.makedirs(save_dir, exist_ok=True)
         
-        # 保存向量数据
+        # 保存向量数据和文本块
         np.save(f"{save_dir}/vectors.npy", self.embeds)
-        print(f"向量数据已保存到: {save_dir}/vectors.npy")
-        
-        # 保存对应的文本块
         with open(f"{save_dir}/chunks.txt", 'w', encoding='utf-8') as f:
-            for chunk in self.chunks:
-                f.write(chunk + '\n===\n')
-        print(f"文本块数据已保存到: {save_dir}/chunks.txt")
+            f.write('\n===\n'.join(self.chunks))
         
         # 保存知识库文件的最后修改时间
         with open(f"{save_dir}/last_modified.txt", 'w') as f:
@@ -96,35 +69,32 @@ class Kb:
         Returns:
             list: 包含(文本块, 相似度)元组的列表，按相似度降序排列
         """
-        print("\n=== 开始相似度搜索 ===")
-        print(f"查询文本: {text}")
-        
-        # 获取查询文本的向量表示
-        print("正在对查询文本进行向量化...")
-        ask_embed = self.get_embedding(text)
+        logger.info(f"开始搜索相关内容，查询文本: {text}")
+        ask_embed = get_embedding(text)
         if ask_embed is None:
-            print("错误：查询文本向量化失败")
+            logger.error("获取查询文本的嵌入向量失败")
             return []
             
-        # 计算所有文本块的相似度
-        print("计算相似度...")
+        logger.info("开始计算相似度并排序")
+        # 计算所有文本块的相似度并排序
         similarities = []
-        for kb_embed_index, kb_embed in enumerate(self.embeds):
-            similarity = self.similarity(kb_embed, ask_embed)
-            similarities.append((self.chunks[kb_embed_index], similarity))
-            print(f"与第 {kb_embed_index + 1} 个文本块的相似度: {similarity:.4f}")
-        
-        # 按相似度降序排序并获取前top_k个结果
+        for chunk, kb_embed in zip(self.chunks, self.embeds):
+            sim = self.similarity(kb_embed, ask_embed)
+            similarities.append((chunk, sim))
+            logger.debug(f"文本块相似度: {sim:.4f}\n文本块内容: {chunk[:100]}...")
+            
         similarities.sort(key=lambda x: x[1], reverse=True)
+        
+        # 返回前top_k个结果
         top_k = config['retrieval']['top_k']
-        top_results = similarities[:top_k]
+        results = similarities[:top_k]
         
-        print(f"\n找到 {len(top_results)} 个最相似的文本块：")
-        for i, (chunk, similarity) in enumerate(top_results, 1):
-            print(f"\n第 {i} 相似的文本块 (相似度: {similarity:.4f})：")
-            print(chunk)
-        
-        return top_results
+        # 输出选中的结果详情
+        for i, (chunk, sim) in enumerate(results):
+            logger.info(f"Top {i+1} 匹配结果:\n相似度: {sim:.4f}\n文本块内容: {chunk[:200]}...")
+            
+        logger.info(f"搜索完成，找到 {len(results)} 个相关结果")
+        return results
 
     @staticmethod
     def similarity(A, B):

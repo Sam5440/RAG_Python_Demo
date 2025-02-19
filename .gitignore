@@ -1,5 +1,4 @@
 config.json
-embeddings/chunks.txt
-embeddings/last_modified.txt
-embeddings/vectors.npy
+embeddings/*
 __pycache__/*
+logs/*
