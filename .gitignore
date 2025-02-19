@@ -2,3 +2,4 @@ config.json
 embeddings/*
 __pycache__/*
 logs/*
+.DS_Store
