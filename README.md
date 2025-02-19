@@ -8,14 +8,13 @@
 >
 > 链接：[https://cloud.siliconflow.cn/i/g8snVG3G](https://cloud.siliconflow.cn/i/g8snVG3G)
 
-> **更新于2025.2.19,所有内容基于Commit:First版本书写。**
+> **更新于2025.2.19,所有内容基于 `Commit:完善注释`版本书写。**
 
 ---
 
 ## 其他内容
 
-- [RAG系统运行流程详解（以"请介绍下刘芳"为例）](docs/Flow.md)
-
+- [RAG系统运行流程详解（以&#34;请介绍下刘芳&#34;为例）](docs/Flow.md)
 
 ## 🌟 功能特性
 
