@@ -1,0 +1,13 @@
+{
+    "api": {
+        "key": "",
+        "base_url": "https://api.siliconflow.cn/v1"
+    },
+    "models": {
+        "embedding": "Pro/BAAI/bge-m3",
+        "chat": "Qwen/Qwen2.5-72B-Instruct-128K"
+    },
+    "retrieval": {
+        "top_k": 10
+    }
+}
