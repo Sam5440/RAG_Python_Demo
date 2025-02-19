@@ -49,11 +49,12 @@ pip install numpy requests python-dotenv
 ```
 
 ### 配置设置
-1. 复制配置文件
+复制配置文件
+
 ```bash
 cp config_template.json config.json
 ```
-1. 填写获得的API密钥
+填写获得的API密钥
 
 ### 运行示例
 ```bash
@@ -112,7 +113,7 @@ msg = rag.chat('请介绍下刘芳')
 ## ❓ 常见问题
 
 ### Q：如何获取API密钥？
-A：访问[硅基流动平台](https://api.siliconflow.cn/)注册后申请
+A：访问[硅基流动平台](https://cloud.siliconflow.cn/i/g8snVG3G)注册后申请
 
 ### Q：知识库支持多大文件？
 A：建议不超过1MB，过大文件需调整拆分逻辑
