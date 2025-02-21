@@ -14,7 +14,8 @@
 
 ## 其他内容
 
-- [RAG系统运行流程详解（以&#34;请介绍下刘芳&#34;为例）](docs/Flow.md)
+- [RAG系统运行流程详解(deepseek讲解)](docs/DSR1Flow.md)
+-  [[推荐!] RAG系统运行流程详解(Grok3讲解)](docs/Grok3Flow.md)
 
 ## 🌟 功能特性
 
